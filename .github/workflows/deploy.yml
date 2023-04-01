@@ -19,6 +19,8 @@ jobs:
           java-version: 17
       - name: Run test and building
         run: ./gradlew clean test build
+      - name: List
+        run: ls -a
       - name: Moving jar
         run: mkdir staging && cp libs/*.jar staging
       - name: Upload archive
