@@ -20,9 +20,9 @@ jobs:
       - name: Run test and building
         run: ./gradlew clean test build
       - name: List
-        run: ls -a
+        run: cd build && ls -a
       - name: Moving jar
-        run: mkdir staging && cp /build/libs/*.jar staging
+        run: mkdir staging && cp build/libs/*.jar staging
       - name: Upload archive
         uses: actions/upload-artifact@v3
         with:
