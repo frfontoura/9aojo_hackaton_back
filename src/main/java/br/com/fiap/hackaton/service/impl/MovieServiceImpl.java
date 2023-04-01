@@ -7,6 +7,7 @@ import br.com.fiap.hackaton.service.MovieService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,10 +22,15 @@ public class MovieServiceImpl implements MovieService {
 
     @Override
     public List<Movie> findMovie(String query) {
-        List<Movie> list = this.movieRepository.findMoviesByTitleContainingIgnoreCaseOrDescriptionContainingIgnoreCase(query, query);
+        List<Movie> list = null;
+
+        if(query != null) {
+            list = this.movieRepository.findMoviesByTitleContainingIgnoreCaseOrDescriptionContainingIgnoreCase(query, query);
+        } else {
+            list = this.movieRepository.findAll();
+        }
 
         if (list.isEmpty()){
-
             throw new MovieNotFoundException("Nenhum Treinamento encontrado",
                     new StringBuilder("Não foi possível encontrar treinamento com ").append(query).toString());
         }
