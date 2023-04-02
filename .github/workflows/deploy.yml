@@ -7,45 +7,28 @@ on:
 
 jobs:
   build:
-    if: ${{ github.event.pull_request.merged }}
+    name: Build Image
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-        name: Checkout project
-      - uses: actions/setup-java@v3
-        name: Setup Java
-        with:
-          distribution: 'temurin'
-          java-version: 17
-      - name: Run test and building
-        run: ./gradlew clean test build
-      - name: Moving jar
-        run: mkdir staging && cp build/libs/*.jar staging
-      - name: Upload archive
-        uses: actions/upload-artifact@v3
-        with:
-          name: Package
-          path: staging
+      - name: Check out code
+        uses: actions/checkout@v3
 
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        name: Checkout project
-      - name: Download archive
-        uses: actions/download-artifact@v3
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
         with:
-          path: staging
-      - name: Display folder
-        run: ls -R
-      - name: Deploy to EB
-        uses: einaregilsson/beanstalk-deploy@v21
-        with:
-          aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          application_name: hackaton-app
-          environment_name: Hackatonfiap-env
-          version_label: ${{ github.ref_name }}-R${{ github.run_id }}-V${{ github.run_number }}
-          region: us-east-1
-          deployment_package: ./staging/Package/hackaton-0.0.1-SNAPSHOT.jar
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build, tag, and push image to Amazon ECR
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: hackaton_9aojo_grupo_d
+          IMAGE_TAG: hackaton_image
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
