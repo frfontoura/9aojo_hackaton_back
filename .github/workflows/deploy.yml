@@ -19,8 +19,6 @@ jobs:
           java-version: 17
       - name: Run test and building
         run: ./gradlew clean test build
-      - name: List
-        run: cd build && ls -a
       - name: Moving jar
         run: mkdir staging && cp build/libs/*.jar staging
       - name: Upload archive
@@ -46,8 +44,8 @@ jobs:
         with:
           aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          application_name: hackaton-fiap
-          environment_name: hackaton-fiap-env
+          application_name: hackaton-app
+          environment_name: Hackatonfiap-env
           version_label: ${{ github.ref_name }}-R${{ github.run_id }}-V${{ github.run_number }}
           region: us-east-1
           deployment_package: ./staging/Package/hackaton-0.0.1-SNAPSHOT.jar
